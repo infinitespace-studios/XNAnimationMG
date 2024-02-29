@@ -22,6 +22,17 @@
 /processorParam:TextureFormat=Color
 /build:Fonts/Arial.spritefont
 
+#begin Checker.bmp
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=0,0,0,0
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:TextureFormat=Compressed
+/build:Checker.png
+
 #begin Models/character-soldier.fbx
 /importer:FbxImporter
 /processor:SkinnedModelProcessor

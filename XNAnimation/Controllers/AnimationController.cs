@@ -48,11 +48,12 @@ namespace XNAnimation.Controllers
 
         private bool hasFinished;
         private bool isPlaying;
+		private int keyframeIndex;
 
-        #region Properties
+		#region Properties
 
-        /// <inheritdoc />
-        public AnimationClip AnimationClip
+		/// <inheritdoc />
+		public AnimationClip AnimationClip
         {
             get { return animationClip; }
         }
@@ -154,6 +155,11 @@ namespace XNAnimation.Controllers
         public bool CrossFading
         {
             get { return crossFadeEnabled; }
+        }
+
+        public int CurrentKeyFrame 
+        {
+            get { return keyframeIndex; }
         }
 
         #endregion
@@ -367,12 +373,12 @@ namespace XNAnimation.Controllers
                 orientationInterpolation == InterpolationMode.None &&
                     scaleInterpolation == InterpolationMode.None)
             {
-                int keyframeIndex = animationChannel.GetKeyframeIndexByTime(animationTime);
+                keyframeIndex = animationChannel.GetKeyframeIndexByTime(animationTime);
                 outPose = animationChannel[keyframeIndex].Pose;
             }
             else
             {
-                int keyframeIndex = animationChannel.GetKeyframeIndexByTime(animationTime);
+                keyframeIndex = animationChannel.GetKeyframeIndexByTime(animationTime);
                 int nextKeyframeIndex;
 
                 // If we are looping then the next frame may wrap around to 

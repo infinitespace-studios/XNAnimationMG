@@ -34,8 +34,8 @@ namespace XNAnimationSample
         private SpriteFont spriteFont;
         private StringBuilder stringBuilder;
 
-        private KeyboardState keyboradState;
-        private KeyboardState lastKeyboradState;
+        private KeyboardState keyboardState;
+        private KeyboardState lastKeyboardState;
 
         private int activeAnimationClip;
         private string interpolationMode = "Linear";
@@ -147,18 +147,18 @@ namespace XNAnimationSample
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            lastKeyboradState = keyboradState;
-            keyboradState = Keyboard.GetState();
+            lastKeyboardState = keyboardState;
+            keyboardState = Keyboard.GetState();
 
             // Exit the sample.
-            if (keyboradState.IsKeyDown(Keys.Escape))
+            if (keyboardState.IsKeyDown(Keys.Escape))
             {
                 Exit();
             }
 
             // Change the animation clip smoothly by using CrossFade.
-            if (keyboradState.IsKeyDown(Keys.Left) &&
-                lastKeyboradState.IsKeyUp(Keys.Left))
+            if (keyboardState.IsKeyDown(Keys.Left) &&
+                lastKeyboardState.IsKeyUp(Keys.Left))
             {
                 activeAnimationClip = (activeAnimationClip - 1);
 
@@ -169,8 +169,8 @@ namespace XNAnimationSample
 
                 animationController.CrossFade(skinnedModel.AnimationClips.Values[activeAnimationClip], TimeSpan.FromSeconds(0.05f));
             }
-            else if (keyboradState.IsKeyDown(Keys.Right) &&
-                     lastKeyboradState.IsKeyUp(Keys.Right))
+            else if (keyboardState.IsKeyDown(Keys.Right) &&
+                     lastKeyboardState.IsKeyUp(Keys.Right))
             {
                 activeAnimationClip = (activeAnimationClip + 1);
 
@@ -184,7 +184,7 @@ namespace XNAnimationSample
 
             // Change the type of interpolation to use between keyframes.
             // The differences are mainly noticeible at an animation speed of 0.1.
-            if (keyboradState.IsKeyDown(Keys.D1))
+            if (keyboardState.IsKeyDown(Keys.D1))
             {
                 interpolationMode = "None";
 
@@ -192,7 +192,7 @@ namespace XNAnimationSample
                 animationController.OrientationInterpolation = InterpolationMode.None;
                 animationController.ScaleInterpolation = InterpolationMode.None;
             }
-            else if (keyboradState.IsKeyDown(Keys.D2))
+            else if (keyboardState.IsKeyDown(Keys.D2))
             {
                 interpolationMode = "Linear";
 
@@ -200,7 +200,7 @@ namespace XNAnimationSample
                 animationController.OrientationInterpolation = InterpolationMode.Linear;
                 animationController.ScaleInterpolation = InterpolationMode.Linear;
             }
-            else if (keyboradState.IsKeyDown(Keys.D3))
+            else if (keyboardState.IsKeyDown(Keys.D3))
             {
                 interpolationMode = "Cubic";
 
@@ -208,7 +208,7 @@ namespace XNAnimationSample
                 animationController.OrientationInterpolation = InterpolationMode.Linear;
                 animationController.ScaleInterpolation = InterpolationMode.Cubic;
             }
-            else if (keyboradState.IsKeyDown(Keys.D4))
+            else if (keyboardState.IsKeyDown(Keys.D4))
             {
                 interpolationMode = "Spherical";
 
@@ -218,20 +218,20 @@ namespace XNAnimationSample
             }
 
             // Toggle if the animation will loop or not.
-            if (keyboradState.IsKeyDown(Keys.Space) && lastKeyboradState.IsKeyUp(Keys.Space))
+            if (keyboardState.IsKeyDown(Keys.Space) && lastKeyboardState.IsKeyUp(Keys.Space))
             {
                 animationController.LoopEnabled = !animationController.LoopEnabled;
             }
 
             // Change the speed of the animation.
-            if (keyboradState.IsKeyDown(Keys.Up))
+            if (keyboardState.IsKeyDown(Keys.Up))
             {
                 animationController.Speed += 0.005f;
 
                 animationController.Speed = MathHelper.Clamp(
                     animationController.Speed, 0.1f, 5.0f);
             }
-            else if (keyboradState.IsKeyDown(Keys.Down))
+            else if (keyboardState.IsKeyDown(Keys.Down))
             {
                 animationController.Speed -= 0.005f;
 

@@ -1,36 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <RollForward>Major</RollForward>
-    <PublishReadyToRun>false</PublishReadyToRun>
-    <TieredCompilation>false</TieredCompilation>
-    <DotnetCommand>dotnet64</DotnetCommand>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.2.1105">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
-  </ItemGroup>
-  <PropertyGroup>
-    <ApplicationIcon>Icon.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Icon.ico" />
-    <EmbeddedResource Include="Icon.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <MonoGameContentReference Include="..\Content\Content.mgcb" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <ProjectReference Include="..\XNAnimation\XNAnimation.csproj">
-      <Project>{1ef3e196-1367-4836-8041-43959bbae2c1}</Project>
-      <Name>XNAnimation</Name>
-    </ProjectReference>
-  </ItemGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<RollForward>Major</RollForward>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<TieredCompilation>false</TieredCompilation>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<IsOSX>$([MSBuild]::IsOSPlatform('OSX'))</IsOSX>
+		<IsArm64>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'</IsArm64>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(IsOSX)' AND '$(IsArm64)'" >
+		<DotnetCommand>dotnet64</DotnetCommand>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.2.1105">
+			<PrivateAssets>All</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
+	</ItemGroup>
+	<PropertyGroup>
+		<ApplicationIcon>Icon.ico</ApplicationIcon>
+	</PropertyGroup>
+	<PropertyGroup>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Icon.ico" />
+		<EmbeddedResource Include="Icon.bmp" />
+	</ItemGroup>
+	<ItemGroup>
+		<MonoGameContentReference Include="..\Content\Content.mgcb" />
+	</ItemGroup>
+	<ItemGroup />
+	<ItemGroup>
+		<ProjectReference Include="..\XNAnimation\XNAnimation.csproj">
+			<Project>{1ef3e196-1367-4836-8041-43959bbae2c1}</Project>
+			<Name>XNAnimation</Name>
+		</ProjectReference>
+	</ItemGroup>
 </Project>

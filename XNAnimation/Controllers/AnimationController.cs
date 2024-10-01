@@ -48,12 +48,12 @@ namespace XNAnimation.Controllers
 
         private bool hasFinished;
         private bool isPlaying;
-		private int keyframeIndex;
+	private int keyframeIndex;
 
-		#region Properties
+	#region Properties
 
-		/// <inheritdoc />
-		public AnimationClip AnimationClip
+	/// <inheritdoc />
+	public AnimationClip AnimationClip
         {
             get { return animationClip; }
         }

@@ -105,11 +105,11 @@ namespace XNAnimation
         private void CopyBindPoseTo(Pose[] destination, ref int boneIndex)
         {
             destination[boneIndex++] = bindPose;
-			for (int i = 0; i < children.Count; i++)
-			{
-				children[i].CopyBindPoseTo(destination, ref boneIndex);
-			}
-		}
+            for (int i = 0; i < children.Count; i++)
+            {
+                children[i].CopyBindPoseTo(destination, ref boneIndex);
+            }
+        }
 
         internal static SkinnedModelBone Read(ContentReader input)
         {
@@ -129,7 +129,6 @@ namespace XNAnimation
 
             // Read bone parent
             input.ReadSharedResource<SkinnedModelBone>(
-                delegate(SkinnedModelBone parentBone) { skinnedBone.parent = parentBone; });
 
             // Read bone children
             int numChildren = input.ReadInt32();
@@ -137,7 +136,6 @@ namespace XNAnimation
             for (int i = 0; i < numChildren; i++)
             {
                 input.ReadSharedResource<SkinnedModelBone>(
-                    delegate(SkinnedModelBone childBone) { childrenList.Add(childBone); });
             }
             skinnedBone.children = new SkinnedModelBoneCollection(childrenList);
 

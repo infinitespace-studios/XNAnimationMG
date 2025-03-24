@@ -105,8 +105,10 @@ namespace XNAnimation
         private void CopyBindPoseTo(Pose[] destination, ref int boneIndex)
         {
             destination[boneIndex++] = bindPose;
-            foreach (SkinnedModelBone bone in children)
-                bone.CopyBindPoseTo(destination, ref boneIndex);
+            for (int i = 0; i < children.Count; i++)
+            {
+                children[i].CopyBindPoseTo(destination, ref boneIndex);
+            }
         }
 
         internal static SkinnedModelBone Read(ContentReader input)

@@ -13,6 +13,7 @@
  * 
  */
 using System;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -37,16 +38,17 @@ namespace XNAnimationSample
         private KeyboardState keyboardState;
         private KeyboardState lastKeyboardState;
 
-        private int activeAnimationClip;
+        private AnimationClip activeAnimationClip;
+        private int activeAnimationClipIndex = 0;
         private string interpolationMode = "Linear";
 
         private SkinnedModel skinnedModel;
         private AnimationController animationController;
 
-        private float rotation;
+        private Camera camera;
 
-        private Matrix view;
-        private Matrix projection;
+        private Ground ground;
+        private CharacterController controller;
 
         public AnimationSample()
         {
@@ -59,6 +61,10 @@ namespace XNAnimationSample
             };
 
             Content.RootDirectory = "Content";
+
+            //Components.Add (ground);
+
+            controller = new CharacterController(Vector3.Zero);
         }
 
         /// <summary>
@@ -70,10 +76,13 @@ namespace XNAnimationSample
         protected override void Initialize()
         {
             stringBuilder = new StringBuilder();
+            ground = new Ground(this);
 
             base.Initialize();
 
             Window.Title = "Kenney.nl";
+
+
         }
 
         /// <summary>
@@ -107,6 +116,10 @@ namespace XNAnimationSample
 
                     effect.EnableDefaultLighting();
 
+                    // effect.AmbientLightColor = new Vector3 (.9f);
+                    // effect.DiffuseColor = new Vector3 (.9f);
+                    // effect.DirectionalLight0.Direction = Vector3.Left;
+
                     effect.SpecularColor = new Vector3(0.25f);
                     effect.SpecularPower = 16;
                 }
@@ -115,20 +128,20 @@ namespace XNAnimationSample
 
             // Create an animation controller and start a clip
             animationController = new AnimationController(skinnedModel.SkeletonBones);
-            animationController.Speed = 0.5f;
+            animationController.Speed = 1f;
 
             animationController.TranslationInterpolation = InterpolationMode.Linear;
             animationController.OrientationInterpolation = InterpolationMode.Linear;
             animationController.ScaleInterpolation = InterpolationMode.Linear;
 
-            //animationController.StartClip(skinnedModel.AnimationClips["Take 001"]);
-
-            activeAnimationClip = 1; // "UkkoArmature|Idle"
-            animationController.StartClip(skinnedModel.AnimationClips.Values[activeAnimationClip]);
+            activeAnimationClip = skinnedModel.AnimationClips["idle"];
+            animationController.StartClip(activeAnimationClip);
 
             // Set up the camera.
-            view = Matrix.CreateLookAt(new Vector3(100, 100, 500), new Vector3(0, 30, 0), Vector3.Up);
-            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1280 / 720, 1, 1000);
+            var viewport = GraphicsDevice.Viewport;
+            camera = new ChaseCamera(new Vector3(0, 0, 0), new Vector3(0, 500, 1000), Vector3.Up, viewport.Width / viewport.Height);
+            ground.LoadContent();
+            ground.UpdateViewAndProjection(camera.ViewMatrix, camera.ProjectionMatrix);
         }
 
         /// <summary>
@@ -156,30 +169,31 @@ namespace XNAnimationSample
                 Exit();
             }
 
+            int animationCount = skinnedModel.AnimationClips.Count;
             // Change the animation clip smoothly by using CrossFade.
             if (keyboardState.IsKeyDown(Keys.Left) &&
                 lastKeyboardState.IsKeyUp(Keys.Left))
             {
-                activeAnimationClip = (activeAnimationClip - 1);
+                activeAnimationClipIndex = (activeAnimationClipIndex - 1);
 
-                if (activeAnimationClip < 0)
+                if (activeAnimationClipIndex < 0)
                 {
-                    activeAnimationClip = skinnedModel.AnimationClips.Count - 1;
+                    activeAnimationClipIndex = skinnedModel.AnimationClips.Count - 1;
                 }
 
-                animationController.CrossFade(skinnedModel.AnimationClips.Values[activeAnimationClip], TimeSpan.FromSeconds(0.05f));
+                animationController.CrossFade(skinnedModel.AnimationClips.Values[activeAnimationClipIndex], TimeSpan.FromSeconds(0.05f));
             }
             else if (keyboardState.IsKeyDown(Keys.Right) &&
                      lastKeyboardState.IsKeyUp(Keys.Right))
             {
-                activeAnimationClip = (activeAnimationClip + 1);
+                activeAnimationClipIndex = (activeAnimationClipIndex + 1);
 
-                if (activeAnimationClip >= skinnedModel.AnimationClips.Count)
+                if (activeAnimationClipIndex >= skinnedModel.AnimationClips.Count)
                 {
-                    activeAnimationClip = 0;
+                    activeAnimationClipIndex = 0;
                 }
 
-                animationController.CrossFade(skinnedModel.AnimationClips.Values[activeAnimationClip], TimeSpan.FromSeconds(0.05f));
+                animationController.CrossFade(skinnedModel.AnimationClips.Values[activeAnimationClipIndex], TimeSpan.FromSeconds(0.05f));
             }
 
             // Change the type of interpolation to use between keyframes.
@@ -218,33 +232,58 @@ namespace XNAnimationSample
             }
 
             // Toggle if the animation will loop or not.
-            if (keyboardState.IsKeyDown(Keys.Space) && lastKeyboardState.IsKeyUp(Keys.Space))
+            // if (keyboradState.IsKeyDown(Keys.Space) && lastKeyboradState.IsKeyUp(Keys.Space))
+            // {
+            //     animationController.LoopEnabled = !animationController.LoopEnabled;
+            // }
+
+            controller.Update(gameTime);
+
+            var v = controller.Velocity;
+            v.Y = 0f; // zero out the vertical component
+            var l = v.Length();
+            AnimationClip clip = null;
+            if (l > 0.1f)
+                clip = skinnedModel.AnimationClips["sprint"];
+            else if (l > 0f)
+                clip = skinnedModel.AnimationClips["walk"];
+            else
+                clip = skinnedModel.AnimationClips["idle"];
+
+            if (controller.Velocity.Y > 0f)
             {
-                animationController.LoopEnabled = !animationController.LoopEnabled;
+                clip = skinnedModel.AnimationClips["jump"];
             }
 
-            // Change the speed of the animation.
-            if (keyboardState.IsKeyDown(Keys.Up))
+            if (keyboardState.IsKeyDown(Keys.LeftControl))
             {
-                animationController.Speed += 0.005f;
-
-                animationController.Speed = MathHelper.Clamp(
-                    animationController.Speed, 0.1f, 5.0f);
+                clip = skinnedModel.AnimationClips["attack-melee-right"];
             }
-            else if (keyboardState.IsKeyDown(Keys.Down))
+            if (lastKeyboardState.IsKeyUp(Keys.LeftControl) && activeAnimationClip == skinnedModel.AnimationClips["attack-melee-right"])
             {
-                animationController.Speed -= 0.005f;
-
-                animationController.Speed = MathHelper.Clamp(
-                    animationController.Speed, 0.1f, 5.0f);
+                clip = skinnedModel.AnimationClips["idle"];
             }
 
-            // Update the models rotation.
-            rotation += (float)gameTime.ElapsedGameTime.TotalSeconds * 0.4f;
+            if (activeAnimationClip != clip)
+            {
+                activeAnimationClip = clip;
+                animationController.CrossFade(clip, TimeSpan.FromSeconds(0.05f));
+            }
+            v = Vector3.Normalize(controller.Velocity);
+            if (l > 0f)
+                animationController.Speed = (float)v.Length();
+            else animationController.Speed = 1f;
             // Update the models animation.
             animationController.Update(gameTime.ElapsedGameTime, Matrix.Identity);
-
+            camera.Position = controller.Position;
+            camera.Update(gameTime);
+            ground.UpdateViewAndProjection(camera.ViewMatrix, camera.ProjectionMatrix);
             base.Update(gameTime);
+        }
+
+        public static float Map(float value, float fromMin, float fromMax, float toMin, float toMax)
+        {
+            return (value - fromMin) * (toMax - toMin) / (fromMax - fromMin) + toMax;
         }
 
         /// <summary>
@@ -255,6 +294,8 @@ namespace XNAnimationSample
         {
             graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            ground.Draw(gameTime);
+
             GraphicsDevice.BlendState = BlendState.Opaque;
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
@@ -264,14 +305,16 @@ namespace XNAnimationSample
                 foreach (SkinnedEffect effect in mesh.Effects)
                 {
                     effect.SetBoneTransforms(animationController.SkinnedBoneTransforms);
-                    effect.World = Matrix.CreateRotationY(rotation);
+                    effect.World = Matrix.CreateFromQuaternion(controller.Rotation) * Matrix.CreateTranslation(controller.Position);
 
-                    effect.View = view;
-                    effect.Projection = projection;
+                    effect.View = camera.ViewMatrix;
+                    effect.Projection = camera.ProjectionMatrix;
                 }
 
                 mesh.Draw();
             }
+
+
 
             DrawHUD();
 
@@ -284,22 +327,22 @@ namespace XNAnimationSample
 
             stringBuilder.Clear();
 
-            string animationName = skinnedModel.AnimationClips.Keys[activeAnimationClip];
+            string animationName = activeAnimationClip.Name;
 
             stringBuilder.AppendLine("Press Left/Right to change the current animation");
             stringBuilder.AppendLine(string.Format("    Current Animation : {0}", animationName));
 
-            stringBuilder.AppendLine();
+            // stringBuilder.AppendLine();
 
-            stringBuilder.AppendLine("Press Up/Down to change the animation speed");
-            stringBuilder.Append("    Animation Speed : ");
-            stringBuilder.Append(animationController.Speed);
+            // stringBuilder.AppendLine("Press Up/Down to change the animation speed");
+            // stringBuilder.Append("    Animation Speed : ");
+            // stringBuilder.Append(animationController.Speed);
 
-            stringBuilder.AppendLine();
+            // stringBuilder.AppendLine();
 
-            stringBuilder.AppendLine("\nPress Space to toggle looping");
-            stringBuilder.Append("    Looping : ");
-            stringBuilder.Append(animationController.LoopEnabled);
+            // stringBuilder.AppendLine("\nPress Space to toggle looping");
+            // stringBuilder.Append("    Looping : ");
+            // stringBuilder.Append(animationController.LoopEnabled);
 
             stringBuilder.AppendLine();
 
@@ -308,6 +351,9 @@ namespace XNAnimationSample
             stringBuilder.Append(interpolationMode);
 
             stringBuilder.AppendLine();
+
+            stringBuilder.AppendLine($"Velocity : {controller.Velocity}");
+            stringBuilder.AppendLine($"Position : {controller.Position}");
 
             // stringBuilder.AppendLine("\nThe type of interpolation controls how the animation");
             // stringBuilder.AppendLine("controller blends between two keyframes and also how");

@@ -31,14 +31,14 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:TextureFormat=Compressed
-/build:Checker.png
+/build:Models/Textures/Checker.png
 
 #begin Models/character-soldier.fbx
 /importer:FbxImporter
 /processor:SkinnedModelProcessor
 /processorParam:BakeMeshTransforms=True
 /processorParam:GenerateTangentFrame=False
-/processorParam:ModelRotate=0, 0, 0
+/processorParam:ModelRotate=0, 180, 0
 /processorParam:ModelScale=1
 /processorParam:TextureFormat=Color
 /build:Models/character-soldier.fbx

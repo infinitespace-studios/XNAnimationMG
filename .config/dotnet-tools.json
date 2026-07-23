@@ -9,25 +9,25 @@
       ]
     },
     "dotnet-mgcb-editor": {
-      "version": "3.8.2.1105",
+      "version": "3.8.5",
       "commands": [
         "mgcb-editor"
       ]
     },
     "dotnet-mgcb-editor-linux": {
-      "version": "3.8.2.1105",
+      "version": "3.8.5",
       "commands": [
         "mgcb-editor-linux"
       ]
     },
     "dotnet-mgcb-editor-windows": {
-      "version": "3.8.2.1105",
+      "version": "3.8.5",
       "commands": [
         "mgcb-editor-windows"
       ]
     },
     "dotnet-mgcb-editor-mac": {
-      "version": "3.8.2.1105",
+      "version": "3.8.5",
       "commands": [
         "mgcb-editor-mac"
       ]

@@ -7,15 +7,6 @@
 		<TieredCompilation>false</TieredCompilation>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<IsOSX>$([MSBuild]::IsOSPlatform('OSX'))</IsOSX>
-		<IsArm64>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'</IsArm64>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(IsOSX)' AND '$(IsArm64)'" >
-		<DotnetCommand>dotnet64</DotnetCommand>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.5">
 			<PrivateAssets>All</PrivateAssets>

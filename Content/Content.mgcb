@@ -10,8 +10,8 @@
 
 #-------------------------------- References --------------------------------#
 
-/reference:../XNAnimationPipeline/bin/Debug/net8.0/XNAnimation.dll
-/reference:../XNAnimationPipeline/bin/Debug/net8.0/XNAnimationPipeline.dll
+/reference:../XNAnimationPipeline/bin/Release/net8.0/XNAnimation.dll
+/reference:../XNAnimationPipeline/bin/Release/net8.0/XNAnimationPipeline.dll
 
 #---------------------------------- Content ---------------------------------#
 

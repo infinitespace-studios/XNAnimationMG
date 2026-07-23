@@ -26,6 +26,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Setup Wine
+        uses: monogame/monogame-actions/install-wine@v1
+
+      - name: Install Fonts
+        uses: monogame/monogame-actions/install-fonts@v1
+
       - name: Set up .NET 8
         uses: actions/setup-dotnet@v4
         with:

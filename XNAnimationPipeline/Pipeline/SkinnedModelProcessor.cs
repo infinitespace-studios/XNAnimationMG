@@ -141,12 +141,14 @@ namespace XNAnimationPipeline.Pipeline
             AnimationClipContentDictionary animationClipDictionary =
                 ProcessAnimations(input, rootBone.Animations, skinnedModelBoneCollection, context);
 
-            OpaqueDataDictionary processorParameters = new OpaqueDataDictionary();
-            processorParameters["DefaultEffect"] = MaterialProcessorDefaultEffect.SkinnedEffect;
-
             // Uses the default model processor
+            ModelProcessor modelProcessor = new ModelProcessor
+            {
+                DefaultEffect = MaterialProcessorDefaultEffect.SkinnedEffect
+            };
+
             ModelContent modelContent =
-                context.Convert<NodeContent, ModelContent>(input, "ModelProcessor", processorParameters);
+                context.Convert<NodeContent, ModelContent>(input, modelProcessor);
 
             // Return a new skinned model
             return new SkinnedModelContent(modelContent, skinnedModelBoneCollection, 
@@ -320,17 +322,18 @@ namespace XNAnimationPipeline.Pipeline
         protected virtual MaterialContent ProcessMaterial(MaterialContent materialContent,
             ContentProcessorContext context)
         {
-            OpaqueDataDictionary processorParameters = new OpaqueDataDictionary();
+            MaterialProcessor materialProcessor = new MaterialProcessor
+            {
+                ColorKeyColor = new Color(1, 0, 1, 1),
+                ColorKeyEnabled = true,
+                TextureFormat = TextureProcessorOutputFormat.DxtCompressed,
+                GenerateMipmaps = true,
+                ResizeTexturesToPowerOfTwo = false,
+                PremultiplyTextureAlpha = true,
+                DefaultEffect = MaterialProcessorDefaultEffect.SkinnedEffect
+            };
 
-            processorParameters["ColorKeyColor"] = new Color(1, 0, 1, 1);
-            processorParameters["ColorKeyEnabled"] = true;
-            processorParameters["TextureFormat"] = TextureProcessorOutputFormat.DxtCompressed;
-            processorParameters["GenerateMipmaps"] = true;
-            processorParameters["ResizeTexturesToPowerOfTwo"] = false;
-            processorParameters["PremultiplyTextureAlpha"] = true;
-            processorParameters["DefaultEffect"] = MaterialProcessorDefaultEffect.SkinnedEffect;
-
-            return context.Convert<MaterialContent, MaterialContent>(materialContent, typeof(MaterialProcessor).Name, processorParameters);
+            return context.Convert<MaterialContent, MaterialContent>(materialContent, materialProcessor);
         }
 
         /// <summary>
@@ -504,7 +507,7 @@ namespace XNAnimationPipeline.Pipeline
                     // Check if the user have defined both start time and frame
                     if (startTimeText != null && startFrameText != null)
                     {
-                        context.Logger.LogWarning(null, null, string.Format(
+                        context.Logger.Log(LogLevel.Warning, string.Format(
                             "Split animation {0} on animation {1} has both start time and " +
                             "start frame tags. Start frame will be discarded.",
                             splitName, animationName));
@@ -513,7 +516,7 @@ namespace XNAnimationPipeline.Pipeline
                     // Check if the user have defined both end time and frame
                     if (endTimeText != null && endFrameText != null)
                     {
-                        context.Logger.LogWarning(null, null, string.Format(
+                        context.Logger.Log(LogLevel.Warning, string.Format(
                             "Split animation {0} on animation {1} has both end time and " +
                             "end frame tags. End frame will be discarded.",
                             splitName, animationName));
@@ -675,7 +678,7 @@ namespace XNAnimationPipeline.Pipeline
 
             if (animationsElement == null)
             {
-                context.Logger.LogWarning(null, null, "Split animation document does not " +
+                context.Logger.Log(LogLevel.Warning, "Split animation document does not " +
                 "contain an <ANIMATIONS> tag and will be skipped.");
                 return;
             }
@@ -703,8 +706,8 @@ namespace XNAnimationPipeline.Pipeline
                     int animationFramerate = DefaultAnimationFramerate;
                     if (animationFramerateText == null)
                     {
-                        context.Logger.LogWarning(null, null, "Using the default {0} " +
-                            "frames per second framerate to split animations.");
+                        context.Logger.Log(LogLevel.Warning, string.Format("Using the default {0} " +
+                            "frames per second framerate to split animations.", DefaultAnimationFramerate));
                     }
                     else
                     {
@@ -752,7 +755,7 @@ namespace XNAnimationPipeline.Pipeline
 
             if (!containsAnimationElement)
             {
-                context.Logger.LogWarning(null, null, "Split animation document does not contain " +
+                context.Logger.Log(LogLevel.Warning, "Split animation document does not contain " +
                     "any <ANIMATION> tag.");
             }
         }
@@ -863,7 +866,7 @@ namespace XNAnimationPipeline.Pipeline
 
             if (animationDictionary.Count == 0)
             {
-                context.Logger.LogWarning(null, rootBone.Identity,
+                context.Logger.Log(LogLevel.Warning,
                     "Input model does not contain any animation.");
             }
 
@@ -874,9 +877,9 @@ namespace XNAnimationPipeline.Pipeline
         {
             if (mesh.Parent is BoneContent)
             {
-                context.Logger.LogWarning(null, mesh.Identity,
+                context.Logger.Log(LogLevel.Warning, string.Format(
                     "Mesh {0} is a child of bone {1}. Meshes that are children of bones might " +
-                    "not be handled correct.", mesh.Name, mesh.Parent.Name);
+                    "not be handled correct.", mesh.Name, mesh.Parent.Name));
             }
 
             return true;
@@ -914,7 +917,7 @@ namespace XNAnimationPipeline.Pipeline
             BoneContent boneContent = nodeContent as BoneContent;
             if (boneContent == null)
             {
-                context.Logger.LogWarning(null, nodeContent.Identity, string.Format(
+                context.Logger.Log(LogLevel.Warning, string.Format(
                     "Node {0} is invalid inside the model's skeleton and will be skipped.",
                     nodeContent.Name));
 
@@ -929,7 +932,7 @@ namespace XNAnimationPipeline.Pipeline
             // Check if this animation has any channel
             if (animation.Channels.Count == 0)
             {
-                context.Logger.LogWarning(null, animation.Identity, String.Format(
+                context.Logger.Log(LogLevel.Warning, String.Format(
                     "Animation {0} does not contain any channel and will be skipped.",
                     animation.Name));
 
@@ -939,7 +942,7 @@ namespace XNAnimationPipeline.Pipeline
             // Check if this channel has any keyframe
             if (animation.Duration <= TimeSpan.Zero)
             {
-                context.Logger.LogWarning(null, animation.Identity, String.Format(
+                context.Logger.Log(LogLevel.Warning, String.Format(
                     "Animation {0} has a zero duration and will be skipped.", animation.Name));
 
                 return false;
@@ -956,7 +959,7 @@ namespace XNAnimationPipeline.Pipeline
             // Check if this channel has any keyframe
             if (animationChannelPair.Value.Count == 0)
             {
-                context.Logger.LogWarning(null, parentAnimation.Identity, String.Format(
+                context.Logger.Log(LogLevel.Warning, String.Format(
                     "Channel {0} in animation {1} does not contain any keyframe and will be skipped.",
                     animationChannelPair.Key, parentAnimation.Name));
 
@@ -976,7 +979,7 @@ namespace XNAnimationPipeline.Pipeline
 
             if (!boneFound)
             {
-                context.Logger.LogWarning(null, parentAnimation.Identity, String.Format(
+                context.Logger.Log(LogLevel.Warning, String.Format(
                     "Channel {0} in animation {1} affects a bone that does not exists in the " +
                     "model's skeleton and will be skipped.", animationChannelPair.Key, 
                     parentAnimation.Name));
